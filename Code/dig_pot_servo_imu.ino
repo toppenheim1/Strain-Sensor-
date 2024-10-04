@@ -1,19 +1,30 @@
-#include <Adafruit_DS3502.h>
+/* This arduino Code is used for the auto-bender.
+
+The following actions are taking by the auto bender:
+
+(1) rotate a servo motor and  (2) acquire data from the following sensors:  
+
+ [A] Strain Gauge voltage data ouput from either:  (1) Voltage Divider Circuit Adafruit_MCP3421 (https://www.adafruit.com/product/5870) 
+or (2) Wheatstone Bridge Circuit (https://www.adafruit.com/product/4538)
+ [B] Adafruit BNO055 (https://www.adafruit.com/product/2472)
+ [C] 320 degree Rotary Hall Effect Encoder (https://p3america.com/erc-series/?srsltid=AfmBOoqSsWeZSXtsMrmoHyB0DRfSCzyFlUfcnEff0gpcv0NyMvrGhVz7)
+
+ */
+
+// The following libraries are or were used 
+
+#include <Adafruit_DS3502.h>  // Digital Potentiometer Library no longer used
 #include <Servo.h>
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
-#include <Adafruit_INA219.h>
+#include <Adafruit_INA219.h>  // Current Sensor Library no longer used
 #include "Adafruit_MCP3421.h"
 #include <Adafruit_NAU7802.h>
 
-Adafruit_NAU7802 nau;
-
-//18-bit sensor object 
-Adafruit_MCP3421 mcp;
-
-//current sensor object 
+Adafruit_NAU7802 nau;  // 24 bit ADC object created for wheatstone bridge circuit
+Adafruit_MCP3421 mcp;  // 14 bit ADC object created for voltage divider circuit
 
 //IMU object with address 0x29....we may need multiple imu's in future and so will need to specify address 
 //of each imu...could also just use a multiplexer
@@ -32,7 +43,7 @@ int val = 0;  // variable to store the value read
 void setup() {
   Serial.begin(115200);
   
-   myservo.attach(9);  // attaches the servo on pin 9 to the servo object
+   myservo.attach(9);  // attaches the servo on Arduino digital pin 9 to the servo object
     /* Initialise the sensor */
   if(!bno.begin())
   {
@@ -50,6 +61,13 @@ void setup() {
   }
   Serial.println("Found NAU7802");
 
+
+/* 
+
+Here we have the option of selecting the excitation voltage to the weatstone bridge.  To my understanding, the larger the excitation voltage, 
+the larger potential for increased SNR.
+
+*/
   nau.setLDO(NAU7802_2V7);
   Serial.print("LDO voltage set to ");
   switch (nau.getLDO()) {
@@ -63,6 +81,13 @@ void setup() {
     case NAU7802_2V4:  Serial.println("2.4V"); break;
     case NAU7802_EXTERNAL:  Serial.println("External"); break;
   }
+
+/* 
+
+Here we have the option of selecting the Vout gain of the weatstone bridge.  To my understanding, the larger the gain, 
+the larger potential for increased SNR.  However, to high of a gain may saturate readout of the ADC (we have 24 bit so max of 2^24)
+
+*/
 
   nau.setGain(NAU7802_GAIN_128);
   Serial.print("Gain set to ");
@@ -104,6 +129,12 @@ void setup() {
     delay(1000);
   }
   Serial.println("Calibrated system offset");
+
+/*
+
+The following greyed out code is for the 14 bit adc used for the voltage divider circuit. 
+
+*/
 
  // Begin can take an optional address and Wire interface
   //if (!mcp.begin(0x68, &Wire)) { 
@@ -152,7 +183,7 @@ void loop() {
         //d stores string data read from serial port
         d = Serial.readString();
         //d converted to integer
-        state = d.toInt();
+        e = d.tostatInt();
         //following if statement used to ensure data sent from python to arduino is held constant and not reverted back to 0
         //otherwise servo goes to desired angle and immidiately reverts back to 0 degrees
         if  ((state <= 10) ) {  //&& (state > 0)
