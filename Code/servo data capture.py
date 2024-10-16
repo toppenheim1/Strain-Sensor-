@@ -11,13 +11,14 @@ import matplotlib.pyplot as plt  # To visualize
 
 # connect to arduino and clear buffer
 ser = serial.Serial(port='COM4', baudrate=115200)
-ser.flush()
+
 
 # create empty array for data storage
 d = []
-x = str(0)
+x = str(0)  #was this causing plate to swing up initially????
 ser.write(x.encode())
 time.sleep(2)
+ser.flush()
 
 # vary the bend angle from 0 to 60 degrees in 10 degree increments.
 # python sends a value, say 1, and arduino reads that value, multiplies the value by 10 and then subrracts 10.
@@ -59,7 +60,7 @@ df.columns = ['Theoretical Angle (deg)', 'IMU Angle (deg)', 'ADC Value', 'Rotary
 #df.replace([np.inf, -np.inf], np.nan, inplace=True)
 #df.dropna(how="all", inplace=True)
 
-df.to_csv('Bending_data_10_2_24_v1.csv', index=False)
+df.to_csv('Bending_data_10_14_2024_v12_test.csv', index=False)
 print(df)
 
 

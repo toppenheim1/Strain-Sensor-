@@ -42,8 +42,10 @@ int val = 0;  // variable to store the value read
 
 void setup() {
   Serial.begin(115200);
-  
+   
+
    myservo.attach(9);  // attaches the servo on Arduino digital pin 9 to the servo object
+
     /* Initialise the sensor */
   if(!bno.begin())
   {
@@ -89,7 +91,7 @@ the larger potential for increased SNR.  However, to high of a gain may saturate
 
 */
 
-  nau.setGain(NAU7802_GAIN_128);
+  nau.setGain(NAU7802_GAIN_32);
   Serial.print("Gain set to ");
   switch (nau.getGain()) {
     case NAU7802_GAIN_1:  Serial.println("1x"); break;
@@ -183,7 +185,7 @@ void loop() {
         //d stores string data read from serial port
         d = Serial.readString();
         //d converted to integer
-        e = d.tostatInt();
+        state = d.toInt();
         //following if statement used to ensure data sent from python to arduino is held constant and not reverted back to 0
         //otherwise servo goes to desired angle and immidiately reverts back to 0 degrees
         if  ((state <= 10) ) {  //&& (state > 0)
@@ -191,7 +193,7 @@ void loop() {
           // 7 produduces an IMU angle of about 0 degrees!!
           i  = (-10*state + 70);  
           myservo.write(i); 
-          delay(50); 
+          delay(1000); 
          }     
         }
 
